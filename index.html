@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>unixNEWS</title>
+<style>
+:root {
+  --bg: #0a0f1c;
+  --card: #1f2937;
+  --text: #f1f5f9;
+  --accent: #4f46e5;
+  --hover: #6366f1;
+}
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+header {
+  text-align: center;
+  background: var(--card);
+  padding: 20px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+
+header p {
+  margin: 5px 0 0 0;
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+#news-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 25px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.news {
+  background: var(--card);
+  border-radius: 15px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.news:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(79,70,229,0.4);
+}
+
+.news img {
+  width: 100%;
+  border-radius: 12px;
+  max-height: 180px;
+  object-fit: cover;
+  margin-bottom: 12px;
+  transition: transform 0.3s ease;
+}
+
+.news:hover img {
+  transform: scale(1.05);
+}
+
+.news h2 {
+  font-size: 1.15rem;
+  margin: 0 0 10px;
+  color: var(--accent);
+}
+
+.news p {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  flex-grow: 1;
+}
+
+.news a {
+  color: var(--hover);
+  text-decoration: none;
+  font-weight: bold;
+  margin-top: 8px;
+  display: inline-block;
+}
+
+#loader {
+  text-align: center;
+  padding: 20px;
+  color: var(--accent);
+  font-size: 1rem;
+}
+
+footer {
+  text-align: center;
+  padding: 15px;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  border-top: 1px solid #1e293b;
+}
+
+@media (max-width: 600px) {
+  header h1 {
+    font-size: 1.5rem;
+  }
+  .news {
+    padding: 12px;
+  }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>unixNEWS</h1>
+  <p>Бесконечная лента IT-новостей из 50+ источников</p>
+</header>
+
+<div id="news-container">Загрузка новостей...</div>
+<div id="loader">🔄 Подгружаем новости...</div>
+
+<footer>© 2025 unixNEWS — обновляется при каждой загрузке</footer>
+
+<script>
+const rssFeeds = [
+  "https://habr.com/ru/rss/all/all/",
+  "https://feeds.bbci.co.uk/news/technology/rss.xml",
+  "https://www.theverge.com/rss/index.xml",
+  "https://www.cnet.com/rss/news/",
+  "https://www.wired.com/feed/rss",
+  "https://www.engadget.com/rss.xml",
+  "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml",
+  "https://www.techradar.com/rss",
+  "https://www.zdnet.com/news/rss.xml",
+  "https://www.androidauthority.com/feed/",
+  "https://9to5google.com/feed/",
+  "https://9to5mac.com/feed/",
+  "https://feeds.arstechnica.com/arstechnica/technology-lab",
+  "https://techcrunch.com/feed/",
+  "https://www.xda-developers.com/feed/",
+  "https://lifehacker.com/rss",
+  "https://www.pcworld.com/index.rss",
+  "https://www.makeuseof.com/feed/",
+  "https://thenextweb.com/feed/",
+  "https://www.digitaltrends.com/feed/",
+  "https://slashdot.org/rss/",
+  "https://venturebeat.com/feed/",
+  "https://feeds.feedburner.com/TechSpotNews",
+  "https://www.reddit.com/r/technology/.rss",
+  "https://www.reddit.com/r/programming/.rss",
+  "https://www.reddit.com/r/linux/.rss",
+  "https://www.reddit.com/r/cybersecurity/.rss",
+  "https://www.reddit.com/r/ArtificialIntelligence/.rss",
+  "https://www.reddit.com/r/startups/.rss",
+  "https://www.reddit.com/r/webdev/.rss",
+  "https://www.reddit.com/r/python/.rss",
+  "https://www.reddit.com/r/javascript/.rss",
+  "https://www.reddit.com/r/machinelearning/.rss",
+  "https://www.reddit.com/r/apple/.rss",
+  "https://www.reddit.com/r/android/.rss",
+  "https://www.reddit.com/r/hardware/.rss",
+  "https://www.reddit.com/r/opensource/.rss",
+  "https://www.reddit.com/r/datascience/.rss",
+  "https://www.reddit.com/r/networking/.rss"
+];
+
+const container = document.getElementById("news-container");
+const loader = document.getElementById("loader");
+
+let allNews = [];
+let displayedNews = new Set();
+let displayedCount = 0;
+const batchSize = 10;
+let feedIndices = new Array(rssFeeds.length).fill(0);
+let isLoading = false;
+
+async function fetchRSS(url) {
+  const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
+  try {
+    const res = await fetch(apiUrl);
+    const data = await res.json();
+    return data.items || [];
+  } catch {
+    return [];
+  }
+}
+
+async function loadNextBatch() {
+  if (isLoading) return;
+  isLoading = true;
+
+  for (let i = 0; i < rssFeeds.length; i++) {
+    const items = await fetchRSS(rssFeeds[i]);
+    if (feedIndices[i] < items.length) {
+      const newsItem = items[feedIndices[i]];
+      feedIndices[i]++;
+      if (!displayedNews.has(newsItem.link)) {
+        allNews.push(newsItem);
+        displayedNews.add(newsItem.link);
+      }
+    } else {
+      feedIndices[i] = 0; // повторяем, если новости закончились
+    }
+  }
+
+  allNews.sort((a,b)=> new Date(b.pubDate) - new Date(a.pubDate));
+
+  const slice = allNews.slice(displayedCount, displayedCount + batchSize);
+  slice.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "news";
+    div.innerHTML = `
+      ${item.thumbnail ? `<img src="${item.thumbnail}" alt="">` : ""}
+      <h2>${item.title}</h2>
+      <p>${item.description?.slice(0,180) || "Без описания"}...</p>
+      <a href="${item.link}" target="_blank">Читать полностью →</a>
+    `;
+    container.appendChild(div);
+  });
+
+  displayedCount += batchSize;
+  isLoading = false;
+}
+
+window.addEventListener("scroll", ()=>{
+  if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 200){
+    loadNextBatch();
+  }
+});
+
+window.addEventListener("load", loadNextBatch);
+</script>
+</body>
+</html>
+
