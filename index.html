@@ -187,15 +187,61 @@ footer {
     padding: 12px;
   }
 }
+
+/* Баннер "Скачать приложение" */
+#download-banner {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #4f46e5;
+  color: white;
+  padding: 15px;
+  z-index: 9999;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+#download-banner a {
+  margin-right: 10px;
+  background: #fff;
+  color: #4f46e5;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+#download-banner button {
+  background: #f1f5f9;
+  color: #111827;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
 </style>
 </head>
 <body>
+
+<!-- Баннер для скачивания -->
+<div id="download-banner">
+  <span>📥 Скачайте приложение unixNEWS для Android!</span>
+  <div>
+    <a href="https://median.co/share/qdezbwo#apk" target="_blank">Скачать</a>
+    <button onclick="document.getElementById('download-banner').style.display='none'">Закрыть</button>
+  </div>
+</div>
+
 <header>
   <h1>unixNEWS</h1>
   <p>Бесконечная лента IT, технологий и науки 🔥</p>
   <div class="header-buttons">
     <button id="refresh-btn">🆕 Новые новости</button>
-    <a href="https://median.co/share/qdezbwo#apk" class="download-btn" target="_blank">📥 Скачать приложение</a>
   </div>
 </header>
 
@@ -205,6 +251,15 @@ footer {
 <footer>© 2025 unixNEWS — свежие IT-новости со всего мира</footer>
 
 <script>
+// Показ баннера только если НЕ приложение unixNEWS на Android
+window.addEventListener('load', ()=>{
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  if (!(ua.includes("unixNEWS") && /Android/i.test(ua))) {
+    document.getElementById("download-banner").style.display = "flex";
+  }
+});
+
+// RSS-лента
 const rssFeeds = [
   "https://habr.com/ru/rss/all/all/",
   "https://feeds.bbci.co.uk/news/technology/rss.xml",
