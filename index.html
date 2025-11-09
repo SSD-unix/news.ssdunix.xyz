@@ -11,6 +11,7 @@
   --text: #f1f5f9;
   --accent: #4f46e5;
   --hover: #6366f1;
+  --menu-bg: #111827;
 }
 
 body {
@@ -19,13 +20,12 @@ body {
   color: var(--text);
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
 }
 
 header {
   text-align: center;
   background: var(--card);
-  padding: 20px;
+  padding: 20px 10px;
   box-shadow: 0 3px 10px rgba(0,0,0,0.5);
   position: sticky;
   top: 0;
@@ -36,13 +36,27 @@ header h1 {
   margin: 0;
   font-size: 2rem;
   color: var(--accent);
-  letter-spacing: 1px;
 }
 
 header p {
-  margin: 5px 0 0 0;
+  margin: 4px 0 10px 0;
   font-size: 0.9rem;
   color: #94a3b8;
+}
+
+#refresh-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#refresh-btn:hover {
+  background: var(--hover);
 }
 
 #news-container {
@@ -61,7 +75,7 @@ header p {
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
+  position: relative;
 }
 
 .news:hover {
@@ -75,21 +89,16 @@ header p {
   max-height: 180px;
   object-fit: cover;
   margin-bottom: 12px;
-  transition: transform 0.3s ease;
-}
-
-.news:hover img {
-  transform: scale(1.05);
 }
 
 .news h2 {
-  font-size: 1.15rem;
-  margin: 0 0 10px;
+  font-size: 1.05rem;
   color: var(--accent);
+  margin: 0 0 8px;
 }
 
 .news p {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: #cbd5e1;
   flex-grow: 1;
 }
@@ -100,6 +109,49 @@ header p {
   font-weight: bold;
   margin-top: 8px;
   display: inline-block;
+}
+
+.share-btn {
+  background: var(--accent);
+  border: none;
+  color: white;
+  font-size: 0.75rem;
+  padding: 5px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 8px;
+  align-self: flex-start;
+}
+
+.share-btn:hover {
+  background: var(--hover);
+}
+
+.share-menu {
+  display: none;
+  position: absolute;
+  bottom: 40px;
+  right: 10px;
+  background: var(--menu-bg);
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  z-index: 10;
+}
+
+.share-menu a, .share-menu button {
+  display: block;
+  text-decoration: none;
+  color: var(--text);
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+  text-align: left;
+}
+
+.share-menu a:hover, .share-menu button:hover {
+  background: var(--accent);
 }
 
 #loader {
@@ -130,16 +182,18 @@ footer {
 <body>
 <header>
   <h1>unixNEWS</h1>
-  <p>Бесконечная лента IT-новостей из 50+ источников</p>
+  <p>Бесконечная лента IT, технологий и науки 🔥</p>
+  <button id="refresh-btn">🆕 Новые новости</button>
 </header>
 
 <div id="news-container">Загрузка новостей...</div>
-<div id="loader">🔄 Подгружаем новости...</div>
+<div id="loader">🔄 Подгружаем...</div>
 
-<footer>© 2025 unixNEWS — обновляется при каждой загрузке</footer>
+<footer>© 2025 unixNEWS — свежие IT-новости со всего мира</footer>
 
 <script>
 const rssFeeds = [
+  // Основные IT-источники
   "https://habr.com/ru/rss/all/all/",
   "https://feeds.bbci.co.uk/news/technology/rss.xml",
   "https://www.theverge.com/rss/index.xml",
@@ -155,34 +209,48 @@ const rssFeeds = [
   "https://feeds.arstechnica.com/arstechnica/technology-lab",
   "https://techcrunch.com/feed/",
   "https://www.xda-developers.com/feed/",
-  "https://lifehacker.com/rss",
-  "https://www.pcworld.com/index.rss",
-  "https://www.makeuseof.com/feed/",
-  "https://thenextweb.com/feed/",
-  "https://www.digitaltrends.com/feed/",
-  "https://slashdot.org/rss/",
-  "https://venturebeat.com/feed/",
-  "https://feeds.feedburner.com/TechSpotNews",
   "https://www.reddit.com/r/technology/.rss",
   "https://www.reddit.com/r/programming/.rss",
   "https://www.reddit.com/r/linux/.rss",
   "https://www.reddit.com/r/cybersecurity/.rss",
-  "https://www.reddit.com/r/ArtificialIntelligence/.rss",
-  "https://www.reddit.com/r/startups/.rss",
+  "https://www.reddit.com/r/artificial/.rss",
   "https://www.reddit.com/r/webdev/.rss",
-  "https://www.reddit.com/r/python/.rss",
-  "https://www.reddit.com/r/javascript/.rss",
-  "https://www.reddit.com/r/machinelearning/.rss",
-  "https://www.reddit.com/r/apple/.rss",
-  "https://www.reddit.com/r/android/.rss",
-  "https://www.reddit.com/r/hardware/.rss",
   "https://www.reddit.com/r/opensource/.rss",
-  "https://www.reddit.com/r/datascience/.rss",
-  "https://www.reddit.com/r/networking/.rss"
+  "https://www.reddit.com/r/machinelearning/.rss",
+  "https://www.reddit.com/r/hardware/.rss",
+  "https://www.reddit.com/r/ai/.rss",
+  "https://www.reddit.com/r/startups/.rss",
+  "https://www.reddit.com/r/dataisbeautiful/.rss",
+  "https://www.reddit.com/r/futurology/.rss",
+  "https://www.reddit.com/r/science/.rss",
+  "https://www.reddit.com/r/space/.rss",
+  "https://feeds.feedburner.com/TechSpotNews",
+  "https://venturebeat.com/feed/",
+  "https://slashdot.org/rss/",
+  "https://www.makeuseof.com/feed/",
+  "https://www.pcworld.com/index.rss",
+  "https://thenextweb.com/feed/",
+  "https://www.digitaltrends.com/feed/",
+  "https://www.tomshardware.com/feeds/all",
+  "https://lifehacker.com/rss",
+  "https://gizmodo.com/rss",
+  "https://www.extremetech.com/feed",
+  "https://www.notebookcheck.net/rss/news.xml",
+  "https://www.phoronix.com/rss.php",
+  "https://opensource.com/feed",
+  "https://itsfoss.com/feed",
+  "https://krebsonsecurity.com/feed/",
+  "https://www.bleepingcomputer.com/feed/",
+  "https://feeds.feedburner.com/venturebeat/SZYF",
+  "https://feed.androidpolice.com/",
+  "https://www.bleepstatic.com/feed/",
+  "https://cybernews.com/feed/"
+  // (и можно легко добавить ещё сотни RSS, просто вставляя сюда)
 ];
 
 const container = document.getElementById("news-container");
 const loader = document.getElementById("loader");
+const refreshBtn = document.getElementById("refresh-btn");
 
 let allNews = [];
 let displayedNews = new Set();
@@ -202,9 +270,17 @@ async function fetchRSS(url) {
   }
 }
 
-async function loadNextBatch() {
+async function loadNextBatch(clear = false) {
   if (isLoading) return;
   isLoading = true;
+  loader.textContent = "🔄 Подгружаем новости...";
+
+  if (clear) {
+    allNews = [];
+    displayedNews.clear();
+    displayedCount = 0;
+    container.innerHTML = "";
+  }
 
   for (let i = 0; i < rssFeeds.length; i++) {
     const items = await fetchRSS(rssFeeds[i]);
@@ -216,7 +292,7 @@ async function loadNextBatch() {
         displayedNews.add(newsItem.link);
       }
     } else {
-      feedIndices[i] = 0; // повторяем, если новости закончились
+      feedIndices[i] = 0;
     }
   }
 
@@ -231,11 +307,27 @@ async function loadNextBatch() {
       <h2>${item.title}</h2>
       <p>${item.description?.slice(0,180) || "Без описания"}...</p>
       <a href="${item.link}" target="_blank">Читать полностью →</a>
+      <button class="share-btn">🔗 Поделиться</button>
+      <div class="share-menu">
+        <a href="https://t.me/share/url?url=${encodeURIComponent(item.link)}" target="_blank">📱 Telegram</a>
+        <a href="https://wa.me/?text=${encodeURIComponent(item.link)}" target="_blank">💬 WhatsApp</a>
+        <a href="mailto:?subject=${encodeURIComponent(item.title)}&body=${encodeURIComponent(item.link)}">📧 Email</a>
+        <button onclick="navigator.clipboard.writeText('${item.link}')">📋 Копировать</button>
+      </div>
     `;
     container.appendChild(div);
+
+    const btn = div.querySelector(".share-btn");
+    const menu = div.querySelector(".share-menu");
+    btn.addEventListener("click", () => {
+      const open = menu.style.display === "block";
+      document.querySelectorAll(".share-menu").forEach(m => m.style.display = "none");
+      menu.style.display = open ? "none" : "block";
+    });
   });
 
   displayedCount += batchSize;
+  loader.textContent = "⬇️ Прокрутите вниз для новых новостей";
   isLoading = false;
 }
 
@@ -245,8 +337,9 @@ window.addEventListener("scroll", ()=>{
   }
 });
 
+refreshBtn.addEventListener("click", ()=> loadNextBatch(true));
+
 window.addEventListener("load", loadNextBatch);
 </script>
 </body>
 </html>
-
