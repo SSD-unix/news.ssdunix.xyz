@@ -251,10 +251,10 @@ footer {
 <footer>© 2025 unixNEWS — свежие IT-новости со всего мира</footer>
 
 <script>
-// Показ баннера только если НЕ приложение unixNEWS на Android
+// Показ баннера только если в URL нет ?app=unixNEWS
 window.addEventListener('load', ()=>{
-  const ua = navigator.userAgent || navigator.vendor || window.opera;
-  if (!(ua.includes("unixNEWS") && /Android/i.test(ua))) {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (!urlParams.has('app') || urlParams.get('app') !== 'unixNEWS') {
     document.getElementById("download-banner").style.display = "flex";
   }
 });
