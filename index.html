@@ -44,7 +44,15 @@ header p {
   color: #94a3b8;
 }
 
-#refresh-btn {
+.header-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+button, a.download-btn {
   background: var(--accent);
   color: white;
   border: none;
@@ -53,9 +61,11 @@ header p {
   font-weight: bold;
   cursor: pointer;
   transition: background 0.3s;
+  text-decoration: none;
+  display: inline-block;
 }
 
-#refresh-btn:hover {
+button:hover, a.download-btn:hover {
   background: var(--hover);
 }
 
@@ -183,7 +193,10 @@ footer {
 <header>
   <h1>unixNEWS</h1>
   <p>Бесконечная лента IT, технологий и науки 🔥</p>
-  <button id="refresh-btn">🆕 Новые новости</button>
+  <div class="header-buttons">
+    <button id="refresh-btn">🆕 Новые новости</button>
+    <a href="https://median.co/share/qdezbwo#apk" class="download-btn" target="_blank">📥 Скачать приложение</a>
+  </div>
 </header>
 
 <div id="news-container">Загрузка новостей...</div>
@@ -193,7 +206,6 @@ footer {
 
 <script>
 const rssFeeds = [
-  // Основные IT-источники
   "https://habr.com/ru/rss/all/all/",
   "https://feeds.bbci.co.uk/news/technology/rss.xml",
   "https://www.theverge.com/rss/index.xml",
@@ -241,11 +253,7 @@ const rssFeeds = [
   "https://itsfoss.com/feed",
   "https://krebsonsecurity.com/feed/",
   "https://www.bleepingcomputer.com/feed/",
-  "https://feeds.feedburner.com/venturebeat/SZYF",
-  "https://feed.androidpolice.com/",
-  "https://www.bleepstatic.com/feed/",
   "https://cybernews.com/feed/"
-  // (и можно легко добавить ещё сотни RSS, просто вставляя сюда)
 ];
 
 const container = document.getElementById("news-container");
