@@ -119,7 +119,7 @@ button:hover {
   display: inline-block;
 }
 
-.share-btn {
+.share-btn, .like-btn {
   background: var(--accent);
   border: none;
   color: white;
@@ -131,7 +131,7 @@ button:hover {
   align-self: flex-start;
 }
 
-.share-btn:hover {
+.share-btn:hover, .like-btn:hover {
   background: var(--hover);
 }
 
@@ -203,7 +203,7 @@ footer {
 <footer>© 2025 unixNEWS — свежие IT-новости со всего мира</footer>
 
 <script>
-// RSS-лента
+// RSS-ленты
 const rssFeeds = [
   "https://habr.com/ru/rss/all/all/",
   "https://feeds.bbci.co.uk/news/technology/rss.xml",
@@ -266,6 +266,67 @@ const batchSize = 10;
 let feedIndices = new Array(rssFeeds.length).fill(0);
 let isLoading = false;
 
+// ======= РЕКОМЕНДАЦИИ =======
+const categories = {
+  ai: [
+    "ai", "artificial intelligence", "machine learning", "ml", "deep learning",
+    "neural network", "chatgpt", "gpt", "openai", "llm", "transformer", "language model"
+  ],
+  programming: [
+    "code", "programming", "developer", "javascript", "python", "java", "c++",
+    "typescript", "webdev", "frontend", "backend", "react", "node.js", "django",
+    "flask", "golang", "rust"
+  ],
+  hardware: [
+    "cpu", "gpu", "intel", "amd", "nvidia", "chip", "processor", "ram",
+    "motherboard", "ssd", "hdd", "gpu mining", "hardware", "pc build", "overclock"
+  ],
+  cybersecurity: [
+    "security", "hacker", "breach", "vulnerability", "exploit", "ddos",
+    "malware", "ransomware", "infosec", "cybersecurity", "phishing", "attack"
+  ],
+  science: [
+    "science", "research", "study", "experiment", "physics", "chemistry",
+    "biology", "astronomy", "space", "quantum", "genetics", "nanotechnology"
+  ],
+  mobile: [
+    "android", "iphone", "ios", "smartphone", "mobile", "app", "apple", "samsung",
+    "google pixel", "phone review", "tablet", "ios update", "android update"
+  ],
+  startup: [
+    "startup", "entrepreneur", "funding", "venture capital", "tech startup",
+    "founder", "series a", "series b", "scaleup"
+  ],
+  other: [
+    "news", "technology", "update", "trend"
+  ]
+};
+
+let userInterests = JSON.parse(localStorage.getItem("interests") || "{}");
+
+function detectCategory(text) {
+  text = text.toLowerCase();
+  for (const c in categories) {
+    if (categories[c].some(k => text.includes(k))) return c;
+  }
+  return "other";
+}
+
+function saveInterest(cat) {
+  if (!userInterests[cat]) userInterests[cat] = 0;
+  userInterests[cat]++;
+  localStorage.setItem("interests", JSON.stringify(userInterests));
+}
+
+function sortByInterests(newsList) {
+  return newsList.sort((a, b) => {
+    const ca = userInterests[a.cat] || 0;
+    const cb = userInterests[b.cat] || 0;
+    return cb - ca;
+  });
+}
+
+// ======= ЗАГРУЗКА RSS =======
 async function fetchRSS(url) {
   const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
   try {
@@ -295,6 +356,7 @@ async function loadNextBatch(clear = false) {
       const newsItem = items[feedIndices[i]];
       feedIndices[i]++;
       if (!displayedNews.has(newsItem.link)) {
+        newsItem.cat = detectCategory(newsItem.title + " " + newsItem.description);
         allNews.push(newsItem);
         displayedNews.add(newsItem.link);
       }
@@ -303,6 +365,7 @@ async function loadNextBatch(clear = false) {
     }
   }
 
+  allNews = sortByInterests(allNews);
   allNews.sort((a,b)=> new Date(b.pubDate) - new Date(a.pubDate));
 
   const slice = allNews.slice(displayedCount, displayedCount + batchSize);
@@ -313,6 +376,7 @@ async function loadNextBatch(clear = false) {
       ${item.thumbnail ? `<img src="${item.thumbnail}" alt="">` : ""}
       <h2>${item.title}</h2>
       <p>${item.description?.slice(0,180) || "Без описания"}...</p>
+      <button class="like-btn" data-cat="${item.cat}">❤️ Нравится</button>
       <a href="${item.link}" target="_blank">Читать полностью →</a>
       <button class="share-btn">🔗 Поделиться</button>
       <div class="share-menu">
@@ -324,6 +388,15 @@ async function loadNextBatch(clear = false) {
     `;
     container.appendChild(div);
 
+    // лайк
+    div.querySelector(".like-btn").addEventListener("click", e => {
+      const cat = e.target.dataset.cat;
+      saveInterest(cat);
+      e.target.textContent = "❤️ Добавлено";
+      e.target.style.background = "#22c55e";
+    });
+
+    // шэр меню
     const btn = div.querySelector(".share-btn");
     const menu = div.querySelector(".share-menu");
     btn.addEventListener("click", () => {
@@ -338,14 +411,15 @@ async function loadNextBatch(clear = false) {
   isLoading = false;
 }
 
+// автоподгрузка при скролле
 window.addEventListener("scroll", ()=>{
   if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 200){
     loadNextBatch();
   }
 });
 
+// кнопка обновления
 refreshBtn.addEventListener("click", ()=> loadNextBatch(true));
-
 window.addEventListener("load", loadNextBatch);
 </script>
 </body>
